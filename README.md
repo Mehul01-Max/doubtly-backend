@@ -1,261 +1,249 @@
-# Doubt Solving Platform - Backend Documentation
+# Doubtly - Backend API Documentation
 
-This documentation outlines the API endpoints and their usage for the doubt solving platform's backend.
+A backend service for a doubt solving platform where users can post questions, provide solutions, and interact with technical content.
 
 ## Base URL
 
+```
 http://localhost:3000/api
+```
 
-## Authentication
+## Authentication Headers
 
-### Sign Up
+For all protected routes, include the Bearer token in Authorization header:
 
-Create a new user account.
+```
+Authorization: Bearer <your_jwt_token>
+```
 
-**Endpoint:** `POST /auth/signup`
+## API Endpoints
 
-**Request Body:**
+### 1. Authentication
+
+#### Register User
+
+```http
+POST /auth/signup
+```
+
+**Body:**
 
 ```json
 {
-  "name": "string",
-  "email": "string",
-  "password": "string"
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "StrongPass1@"
 }
 ```
 
 **Password Requirements:**
 
 - Minimum 8 characters
-- At least one uppercase letter
-- At least one lowercase letter
-- At least one number
-- At least one special character (@$!%\*?&)
+- One uppercase letter
+- One lowercase letter
+- One number
+- One special character (@$!%\*?&)
 
-**Response:**
+#### Login
 
-- Success (200): `{ "message": "user created" }`
-- Error (400):
-  - If fields missing: `{ "message": "Name, Email and Password are required" }`
-  - If email exists: `{ "message": "Email already exists" }`
-  - If password weak: `{ "message": "Password must be at least 8 characters long..." }`
+```http
+POST /auth/signin
+```
 
-### Sign In
-
-Login to get authentication token.
-
-**Endpoint:** `POST /auth/signin`
-
-**Request Body:**
+**Body:**
 
 ```json
 {
-  "email": "string",
-  "password": "string"
+  "email": "john@example.com",
+  "password": "StrongPass1@"
 }
 ```
 
 **Response:**
 
-- Success (200): `{ "token": "jwt_token", "message": "Login Successful" }`
-- Error (400):
-  - If fields missing: `{ "message": "email and password is required" }`
-  - If email not found: `{ "message": "these email is not registered with us" }`
-  - If wrong password: `{ "message": "invalid password" }`
-
-## Doubts
-
-All doubt endpoints require authentication token in headers: `{ "token": "jwt_token" }`
-
-### Create Doubt
-
-**Endpoint:** `POST /doubt/add`
-
-**Request Body:**
-
 ```json
 {
-    "heading": "string",
-    "description": "string",
-    "type": "frontend" | "backend" | "dsa" | "maths" | "ai/ml"
+  "token": "jwt_token_string",
+  "message": "Login Successful"
 }
 ```
 
-**Response:**
+### 2. Doubts
 
-- Success (200): `{ "message": "doubt created" }`
-- Error (400): `{ "message": "heading, description and type are required" }`
+#### Create New Doubt
 
-### Modify Doubt
+```http
+POST /doubt/add
+```
 
-**Endpoint:** `PUT /doubt/modify/:id`
-
-**Request Body:**
+**Body:**
 
 ```json
 {
-    "heading": "string",
-    "description": "string",
-    "type": "frontend" | "backend" | "dsa" | "maths" | "ai/ml"
+  "heading": "How to implement JWT?",
+  "description": "I'm trying to implement JWT in my Node.js application...",
+  "type": "backend"
 }
 ```
 
-**Response:**
+**Note:** Type must be one of: "frontend", "backend", "dsa", "maths", "ai/ml"
 
-- Success (200): `{ "message": "doubt modified" }`
-- Error (400):
-  - If not author: `{ "message": "You are not allowed to modify this question..." }`
-  - If fields missing: `{ "message": "heading, description and type are required" }`
+#### Get Doubts
 
-### Delete Doubt
+- All doubts: `GET /doubt/showAll`
+- By tech stack: `GET /doubt/show/:techStack`
+- Single doubt: `GET /doubt/show/id/:doubtId`
 
-**Endpoint:** `DELETE /doubt/delete/:id`
+#### Update Doubt
 
-**Response:**
+```http
+PUT /doubt/modify/:doubtId
+```
 
-- Success (200): `{ "message": "doubt deleted" }`
-- Error (400): `{ "message": "You are not allowed to delete this question..." }`
+**Body:** Same as create doubt
 
-### Get All Doubts
+#### Delete Doubt
 
-**Endpoint:** `GET /doubt/showAll`
+```http
+DELETE /doubt/delete/:doubtId
+```
 
-**Response:**
+### 3. Solutions
 
-- Success (200): `{ "result": [array_of_doubts] }`
+#### Add Solution
 
-### Get Doubts by Tech Stack
+```http
+POST /solution/add/:questionId
+```
 
-**Endpoint:** `GET /doubt/show/:techStack`
-
-**Response:**
-
-- Success (200): `{ "result": [array_of_doubts] }`
-- Error (404): `{ "message": "this doubt type doesn't exist" }`
-
-### Get Doubt by ID
-
-**Endpoint:** `GET /doubt/show/id/:id`
-
-**Response:**
-
-- Success (200): `{ "result": doubt_object }`
-- Error: `{ "message": "not a valid doubt id" }`
-
-## Solutions
-
-All solution endpoints require authentication token in headers: `{ "token": "jwt_token" }`
-
-### Add Solution
-
-**Endpoint:** `POST /solution/add/:id`
-
-**Request Body:**
+**Body:**
 
 ```json
 {
-  "solution": "string"
+  "solution": "To implement JWT, first install jsonwebtoken package..."
 }
 ```
 
-**Response:**
+#### Modify Solution
 
-- Success (200): `{ "message": "solution added" }`
-- Error (400): `{ "message": "heading, description and type are required" }`
+```http
+PUT /solution/modify/:solutionId
+```
 
-### Modify Solution
-
-**Endpoint:** `PUT /solution/modify/:id`
-
-**Request Body:**
+**Body:**
 
 ```json
 {
-  "solution": "string"
+  "solution": "Updated solution content..."
 }
 ```
 
-**Response:**
+#### Delete Solution
 
-- Success (200): `{ "message": "solution modified" }`
-- Error (400):
-  - If not author: `{ "message": "You are not allowed to modify this solution..." }`
-  - If solution missing: `{ "message": "solution are required" }`
+```http
+DELETE /solution/delete/:solutionId
+```
 
-### Delete Solution
+#### Get Solutions
 
-**Endpoint:** `DELETE /solution/delete/:id`
+```http
+GET /solution/show/:questionId
+```
 
-**Response:**
-
-- Success (200): `{ "message": "solution deleted" }`
-- Error (400): `{ "message": "You are not allowed to delete this solution..." }`
-
-### Get Solutions for a Doubt
-
-**Endpoint:** `GET /solution/show/:id`
-
-**Response:**
-
-- Success (200): `{ "result": [array_of_solutions] }`
-- Error: `{ "message": "invalid id! no doubt with this id exists" }`
-
-## Models
+## Data Models
 
 ### User
 
-```json
+```javascript
 {
-  "name": "string",
-  "email": "string",
-  "password": "string (hashed)",
-  "points": "number"
+    name: String,       // required
+    email: String,      // required, unique
+    password: String,   // required, hashed
+    points: Number      // default: 0
 }
 ```
 
 ### Doubt
 
-```json
+```javascript
 {
-  "userID": "string",
-  "heading": "string",
-  "description": "string",
-  "type": "string (enum)",
-  "status": "boolean",
-  "addDate": "Date",
-  "modifiedDate": "Date"
+    userID: String,     // required
+    heading: String,    // required
+    description: String,// required
+    type: String,      // required, enum: ["frontend", "backend", "dsa", "maths", "ai/ml"]
+    status: Boolean,    // required
+    addDate: Date,     // required
+    modifiedDate: Date  // optional
 }
 ```
 
 ### Solution
 
-```json:Backend/README.md
+```javascript
 {
-    "doubtID": "string",
-    "userID": "string",
-    "solution": "string",
-    "addDate": "Date",
-    "modifiedDate": "Date",
-    "status": "string (pending/correct/wrong)"
+    doubtID: String,    // required
+    userID: String,     // required
+    solution: String,   // required
+    addDate: Date,      // required
+    modifiedDate: Date, // optional
+    status: String      // required, enum: ["pending", "correct", "wrong"]
 }
 ```
 
-## Error Handling
+## Error Responses
 
-All endpoints include error handling for:
-
-- Authentication errors (401)
-- Invalid input (400)
-- Server errors (500)
-
-For protected routes, always include the JWT token in the request headers:
+### Authentication Errors (401)
 
 ```json
 {
-  "token": "your_jwt_token"
+  "message": "Authentication token required"
 }
 ```
 
-This README provides comprehensive documentation for frontend developers to understand and integrate with the backend API. It includes all endpoints, required request formats, expected responses, and error handling information.
-# doubtly-backend
-# doubtly-backend
+or
+
+```json
+{
+  "message": "Invalid Authentication token"
+}
+```
+
+### Validation Errors (400)
+
+```json
+{
+  "message": "specific error message"
+}
+```
+
+### Server Errors (500)
+
+```json
+{
+  "message": "Internal server error"
+}
+```
+
+## Environment Variables
+
+Create a `.env` file with:
+
+```
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+```
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables
+4. Run the server: `npm start`
+
+## Tech Stack
+
+- Node.js
+- Express.js
+- MongoDB
+- JWT for authentication
+- bcrypt for password hashing

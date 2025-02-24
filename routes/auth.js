@@ -4,6 +4,10 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const {UserDB} = require('../models/UserDB');
 const authRouter = Router();
+const isValidEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+}
 const isStrongPassword = (password) => {
     const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return strongPasswordRegex.test(password);
@@ -20,6 +24,11 @@ authRouter.post('/signup', async (req, res) => {
         if (isPresentEmail) {
             return res.status(400).json({
                 message: "Email already exists"
+            })
+        }
+        if (!isValidEmail(email)) {
+            return res.status(400).json({
+                message: "not a valid email"
             })
         }
         if (!isStrongPassword(password)) {
