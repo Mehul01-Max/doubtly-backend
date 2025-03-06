@@ -10,6 +10,7 @@ const {
   formattedDoubts,
   formattedDoubt,
 } = require("../utils/index");
+const { questionsUpVotesDB } = require("../models/questionsUpVotesDB");
 doubt.post("/add", userMiddleware, async (req, res) => {
   try {
     const { heading, description, type } = req.body;
@@ -148,6 +149,35 @@ doubt.get("/show/id/:doubtId", userMiddleware, async (req, res) => {
     console.log(e);
     res.json({
       message: "Internal server error",
+    });
+  }
+});
+doubt.put("/updateUpVotes/:questionID", userMiddleware, async (req, res) => {
+  try {
+    const { questionID } = req.params;
+    const upVoted = await questionsUpVotesDB.findOne({
+      questionID,
+      userID: req.userId,
+    });
+    if (!upVoted) {
+      const newUpVote = new questionsUpVotesDB({
+        questionID,
+        userID: req.userId,
+      });
+      newUpVote.save();
+    } else {
+      console.log(upVoted._id);
+      await questionsUpVotesDB.findByIdAndDelete(upVoted._id);
+    }
+    const upVotes = await questionsUpVotesDB.find({ questionID });
+    await DoubtDB.findByIdAndUpdate(questionID, { upVotes: upVotes.length });
+    res.json({
+      message: "upvote updated",
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(400).json({
+      message: "Internal Server error",
     });
   }
 });
