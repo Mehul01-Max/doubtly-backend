@@ -58,6 +58,7 @@ const formattedDoubts = async (Doubt) => {
   });
   const formattedD = Doubt.map((d) => {
     const userName = userMap[d.userID];
+    // console.log(d.userID);
     const solutionCount = solutionCounts[d._id.toString()];
     return formattedDoubt(d, userName, solutionCount);
   });

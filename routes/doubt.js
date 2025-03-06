@@ -181,4 +181,23 @@ doubt.put("/updateUpVotes/:questionID", userMiddleware, async (req, res) => {
     });
   }
 });
+doubt.get("/mydoubt", userMiddleware, async (req, res) => {
+  try {
+    const Doubt = await DoubtDB.find({ userID: req.userId });
+    if (Doubt.length === 0) {
+      res.json({
+        message: "currently this doubt type is empty",
+      });
+    }
+    const formattedJSON = await formattedDoubts(Doubt);
+    res.json({
+      result: formattedJSON,
+    });
+  } catch (e) {
+    console.log(e);
+    res.json({
+      message: "Internal server error",
+    });
+  }
+});
 module.exports = { doubt };
