@@ -76,6 +76,7 @@ const formattedDoubt = (d, userName, solutionCount) => {
   return {
     id: d._id,
     title: d.heading,
+    description: d.description,
     tags: tags,
     username: userName || "Unknown User",
     answerCount: solutionCount || 0,
