@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const { authRouter } = require("./routes/auth");
 const { doubt } = require("./routes/doubt");
 const { solution } = require("./routes/solution");
+const { comment } = require("./routes/comment");
 const app = express();
 dotenv.config();
 app.use(express.json());
@@ -17,6 +18,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/doubt", doubt);
 app.use("/api/solution", solution);
+app.use("/api/comment", comment);
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
