@@ -13,9 +13,7 @@ const isStrongPassword = (password) => {
     const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return strongPasswordRegex.test(password);
 };
-authRouter.post('/check', userMiddleware, (req, res) => {
-    res.json({ message: "Token validated" });
-});
+
 authRouter.post('/signup', async (req, res) => {
     try {
         const { name, email, password } = req.body;
