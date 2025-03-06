@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const { DoubtDB } = require("../models/DoubtDB");
 const { SolutionDB } = require("../models/SolutionDB");
 const { userMiddleware } = require("../middleware/userMiddleware");
-
+const { SolutionsUpVotesDB } = require("../models/SolutionsUpVotesDB");
 solution.post("/add/:questionId", userMiddleware, async (req, res) => {
   try {
     const { questionId } = req.params;
@@ -109,22 +109,24 @@ solution.get("/show/:questionId", userMiddleware, async (req, res) => {
 solution.put("/updateUpVotes/:solutionID", userMiddleware, async (req, res) => {
   try {
     const { solutionID } = req.params;
-    const upVoted = await questionsUpVotesDB.findOne({
+    const upVoted = await SolutionsUpVotesDB.findOne({
       solutionID,
       userID: req.userId,
     });
     if (!upVoted) {
-      const newUpVote = new questionsUpVotesDB({
+      const newUpVote = new SolutionsUpVotesDB({
         solutionID,
         userID: req.userId,
       });
-      newUpVote.save();
+      await newUpVote.save();
     } else {
       console.log(upVoted._id);
-      await questionsUpVotesDB.findByIdAndDelete(upVoted._id);
+      await SolutionsUpVotesDB.findByIdAndDelete(upVoted._id);
     }
-    const upVotes = await questionsUpVotesDB.find({ questionID });
-    await DoubtDB.findByIdAndUpdate(questionID, { upVotes: upVotes.length });
+    const upVotes = await SolutionsUpVotesDB.find({ solutionID });
+    console.log(solutionID);
+    console.log(upVotes);
+    await SolutionDB.findByIdAndUpdate(solutionID, { upVotes: upVotes.length });
     res.json({
       message: "upvote updated",
     });

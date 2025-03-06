@@ -164,7 +164,7 @@ doubt.put("/updateUpVotes/:questionID", userMiddleware, async (req, res) => {
         questionID,
         userID: req.userId,
       });
-      newUpVote.save();
+      await newUpVote.save();
     } else {
       console.log(upVoted._id);
       await questionsUpVotesDB.findByIdAndDelete(upVoted._id);
