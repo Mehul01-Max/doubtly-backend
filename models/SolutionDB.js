@@ -1,32 +1,37 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const solutionSchema = mongoose.Schema({
-    doubtID: {
-        type: String,
-        required: true
-    },
-    userID: {
-        type: String,
-        required: true
-    },
-    solution: {
-        type: String, 
-        required: true
-    },
-    addDate: {
-        type: Date,
-        required: true
-    },
-    modifiedDate: {
-        type: Date
-    },
-    status: {
-        type: String,
-        required: true,
-        enum: ["pending", "correct", "wrong"]
-    }
-})
+  doubtID: {
+    type: String,
+    required: true,
+  },
+  userID: {
+    type: String,
+    required: true,
+  },
+  solution: {
+    type: String,
+    required: true,
+  },
+  addDate: {
+    type: Date,
+    required: true,
+  },
+  modifiedDate: {
+    type: Date,
+  },
+  status: {
+    type: String,
+    required: true,
+    enum: ["pending", "correct", "wrong"],
+  },
+  upVotes: {
+    type: Number,
+  },
+});
 
-const SolutionDB = mongoose.model('Solution', solutionSchema);
+const SolutionDB = mongoose.model("Solution", solutionSchema);
 
-module.exports = {SolutionDB};
+module.exports = {
+  SolutionDB: SolutionDB,
+};
