@@ -11,7 +11,7 @@ solution.post("/add/:questionId", userMiddleware, async (req, res) => {
     const { solution } = req.body;
     const doubt = await DoubtDB.find({ _id: questionId });
     if (doubt.length === 0) {
-      res.json({
+      return res.json({
         message: "invalid id! no doubt with this id exists",
       });
     }
@@ -28,12 +28,12 @@ solution.post("/add/:questionId", userMiddleware, async (req, res) => {
       addDate: new Date(),
     });
     newDoubt.save();
-    res.json({
+    return res.json({
       message: "solution added",
     });
   } catch (e) {
     console.log(e);
-    res.json({
+    return res.json({
       message: "Internal server error",
     });
   }
@@ -60,11 +60,11 @@ solution.put("/modify/:solutionId", userMiddleware, async (req, res) => {
       { solution, modifiedDate: new Date() },
       { runValidators: true }
     );
-    res.json({
+    return res.json({
       message: "solution modified",
     });
   } catch (e) {
-    res.json({
+    return res.json({
       message: "Internal Server Error",
     });
   }
@@ -81,11 +81,11 @@ solution.delete("/delete/:solutionId", userMiddleware, async (req, res) => {
       });
     }
     await SolutionDB.findByIdAndDelete(solutionId);
-    res.json({
+    return res.json({
       message: "solution deleted",
     });
   } catch (e) {
-    res.json({
+    return res.json({
       message: "Internal server error",
     });
   }
@@ -94,7 +94,7 @@ solution.get("/show/:questionId", userMiddleware, async (req, res) => {
   const { questionId } = req.params;
   const doubt = await DoubtDB.find({ _id: questionId });
   if (doubt.length === 0) {
-    res.json({
+    return res.json({
       message: "invalid id! no doubt with this id exists",
     });
   }
@@ -102,7 +102,7 @@ solution.get("/show/:questionId", userMiddleware, async (req, res) => {
   if (allReventSol === 0) {
     message: "no solution exists yet";
   }
-  res.json({
+  return res.json({
     result: allReventSol,
   });
 });
@@ -127,12 +127,12 @@ solution.put("/updateUpVotes/:solutionID", userMiddleware, async (req, res) => {
     console.log(solutionID);
     console.log(upVotes);
     await SolutionDB.findByIdAndUpdate(solutionID, { upVotes: upVotes.length });
-    res.json({
+    return res.json({
       message: "upvote updated",
     });
   } catch (e) {
     console.log(e);
-    res.status(400).json({
+    return res.status(400).json({
       message: "Internal Server error",
     });
   }

@@ -11,7 +11,7 @@ comment.post("/add/:solutionID", userMiddleware, (req, res) => {
   try {
     const { comment } = req.body;
     if (!comment) {
-      res.status(400).json({
+      return res.status(400).json({
         message: "comment cannot be empty",
       });
     }
@@ -23,12 +23,12 @@ comment.post("/add/:solutionID", userMiddleware, (req, res) => {
       addDate: new Date(),
     });
     newComment.save();
-    res.json({
+    return res.json({
       message: "comment created",
     });
   } catch (e) {
     console.log(e);
-    res.status(400).json({
+    return res.status(400).json({
       message: "Internal server error",
     });
   }
@@ -40,7 +40,7 @@ comment.put("/modify/:commentID", userMiddleware, async (req, res) => {
     const { comment } = req.body;
     let com = await CommentDB.findById(commentID);
     if (!com) {
-      res.status(400).json({
+      return res.status(400).json({
         message: "not a valid comment id",
       });
     }
@@ -62,12 +62,12 @@ comment.put("/modify/:commentID", userMiddleware, async (req, res) => {
       { comment, modifiedDate: new Date() },
       { runValidators: true }
     );
-    res.json({
+    return res.json({
       message: "comment modified",
     });
   } catch (e) {
     console.log(e);
-    res.json({
+    return res.json({
       message: "Internal server error",
     });
   }
@@ -91,11 +91,11 @@ comment.delete("/delete/:commentID", userMiddleware, async (req, res) => {
       });
     }
     await CommentDB.findByIdAndDelete(commentID);
-    res.json({
+    return res.json({
       message: "comment Deleted",
     });
   } catch (e) {
-    res.json({
+    return res.json({
       message: "Internal server error",
     });
   }
@@ -106,15 +106,15 @@ comment.get("/show/:solutionID", userMiddleware, async (req, res) => {
     const comments = await CommentDB.find({ solutionID });
     console.log(solutionID);
     if (!comments) {
-      res.json({
+      return res.json({
         message: "the comment for this solution is empty",
       });
     }
-    res.json({
+    return res.json({
       result: comments,
     });
   } catch (e) {
-    res.status(400).json({
+    return res.status(400).json({
       message: "Internal server error",
     });
   }
