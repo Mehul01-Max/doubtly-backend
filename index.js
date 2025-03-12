@@ -6,6 +6,7 @@ const { authRouter } = require("./routes/auth");
 const { doubt } = require("./routes/doubt");
 const { solution } = require("./routes/solution");
 const { comment } = require("./routes/comment");
+const { userDetails } = require("./routes/userDetails");
 const app = express();
 dotenv.config();
 app.use(express.json());
@@ -19,6 +20,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/doubt", doubt);
 app.use("/api/solution", solution);
 app.use("/api/comment", comment);
+app.use("/api/userDetails", userDetails);
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {

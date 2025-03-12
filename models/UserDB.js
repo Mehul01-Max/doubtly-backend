@@ -17,6 +17,12 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  DoubtPosted: {
+    type: Number,
+  },
+  SolutionGiven: {
+    type: Number,
+  },
   points: {
     type: Number,
     required: true,
