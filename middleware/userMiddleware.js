@@ -15,13 +15,13 @@ const userMiddleware = (req, res, next) => {
         message: "Invalid Authentication token",
       });
     }
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN, (err, user) => {
-      if (err) {
-        return res.status(400).json({
-          message: "Invalid Refresh token",
-        });
-      }
-    });
+    // jwt.verify(refreshToken, process.env.REFRESH_TOKEN, (err, user) => {
+    //   if (err) {
+    //     return res.status(400).json({
+    //       message: "Invalid Refresh token",
+    //     });
+    //   }
+    // });
     req.userId = verify.userId;
     next();
   } catch (e) {

@@ -85,7 +85,7 @@ authRouter.post("/signin", async (req, res) => {
       });
     }
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1m",
+      expiresIn: "1h",
     });
     const refreshToken = jwt.sign(
       { userId: user._id },
@@ -94,7 +94,10 @@ authRouter.post("/signin", async (req, res) => {
         expiresIn: "7d",
       }
     );
-    res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      sameSite: "None",
+    });
     return res.json({ token, message: "Login Successful" });
   } catch (e) {
     console.log(e);
@@ -111,7 +114,7 @@ authRouter.post("/refreshToken", async (req, res) => {
     });
   }
   const token = jwt.sign({ userId: req.userId }, process.env.JWT_SECRET, {
-    expiresIn: "1m",
+    expiresIn: "1h",
   });
 
   res.json({ token });
