@@ -104,36 +104,17 @@ authRouter.post("/signin", async (req, res) => {
   }
 });
 authRouter.post("/refreshToken", async (req, res) => {
-  try {
-    const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) {
-      return res.status(401).json({
-        message: "Refresh token not found",
-      });
-    }
-
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN);
-
-    const newAccessToken = jwt.sign(
-      { userId: decoded.userId },
-      process.env.JWT_SECRET,
-      { expiresIn: "1m" }
-    );
-
-    return res.json({
-      token: newAccessToken,
-      message: "Token refreshed successfully",
-    });
-  } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
-        message: "Refresh token expired, please login again",
-      });
-    }
-    return res.status(401).json({
-      message: "Invalid refresh token",
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    return res.status(400).json({
+      message: "invalid refresh token",
     });
   }
+  const token = jwt.sign({ userId: req.userId }, process.env.JWT_SECRET, {
+    expiresIn: "1m",
+  });
+
+  res.json({ token });
 });
 
 module.exports = { authRouter };
