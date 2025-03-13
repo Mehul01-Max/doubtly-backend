@@ -10,7 +10,7 @@ userDetails.get("/dashboard", userMiddleware, async (req, res) => {
     const user = await UserDB.findOne({ _id: req.userId });
     // console.log(user);
     const userDetails = {
-      name: user.name,
+      name: user.name.split(" ")[0],
       points: user.points,
     };
     if (!user) {
