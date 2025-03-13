@@ -13,10 +13,11 @@ dotenv.config();
 app.use(express.json());
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? "https://doubtly-frontend-flame.vercel.app/"
-        : "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://doubtly-frontend-flame.vercel.app",
+      "https://doubtly-frontend-flame.vercel.app/",
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
