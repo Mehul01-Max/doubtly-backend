@@ -7,10 +7,12 @@ const { doubt } = require("./routes/doubt");
 const { solution } = require("./routes/solution");
 const { comment } = require("./routes/comment");
 const { userDetails } = require("./routes/userDetails");
+const cookieParser = require("cookie-parser");
 const app = express();
 dotenv.config();
 app.use(express.json());
-app.use(cors());
+app.use(cors({}));
+app.use(cookieParser());
 app.get("/", (req, res) => {
   res.json({
     message: "hi",

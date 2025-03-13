@@ -1,9 +1,10 @@
 const bcrypt = require("bcryptjs");
 const { Router } = require("express");
 const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
-const { UserDB } = require("../models/UserDB");
 const { userMiddleware } = require("../middleware/userMiddleware");
+const { UserDB } = require("../models/UserDB");
+const mongoose = require("mongoose");
+
 const authRouter = Router();
 const isValidEmail = (email) => {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -86,14 +87,34 @@ authRouter.post("/signin", async (req, res) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-    res.json({ token, message: "Login Successful" });
+    const refreshToken = jwt.sign(
+      { userId: user._id },
+      process.env.REFRESH_TOKEN,
+      {
+        expiresIn: "7d",
+      }
+    );
+    res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true });
+    return res.json({ token, message: "Login Successful" });
   } catch (e) {
     console.log(e);
-    res.json({
+    return res.json({
       message: "Internal server error",
     });
   }
 });
-// authRouter.post("/refreshToken");
+authRouter.post("/refreshToken", async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    return res.status(400).json({
+      message: "invalid refresh token",
+    });
+  }
+  const token = jwt.sign({ userId: req.userId }, process.env.JWT_SECRET, {
+    expiresIn: "1h",
+  });
+
+  res.json({ token });
+});
 
 module.exports = { authRouter };

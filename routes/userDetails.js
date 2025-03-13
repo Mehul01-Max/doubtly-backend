@@ -8,7 +8,6 @@ const userDetails = Router();
 userDetails.get("/dashboard", userMiddleware, async (req, res) => {
   try {
     const user = await UserDB.findOne({ _id: req.userId });
-    // console.log(user);
     const userDetails = {
       name: user.name.split(" ")[0],
       points: user.points,
