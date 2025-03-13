@@ -85,7 +85,7 @@ authRouter.post("/signin", async (req, res) => {
       });
     }
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "1m",
     });
     const refreshToken = jwt.sign(
       { userId: user._id },
@@ -111,7 +111,7 @@ authRouter.post("/refreshToken", async (req, res) => {
     });
   }
   const token = jwt.sign({ userId: req.userId }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
+    expiresIn: "1m",
   });
 
   res.json({ token });
