@@ -19,6 +19,7 @@ doubt.post("/add", userMiddleware, async (req, res) => {
         message: "heading, description and type are required",
       });
     }
+    console.log(req.userId);
     const newDoubt = new DoubtDB({
       userID: req.userId,
       heading,

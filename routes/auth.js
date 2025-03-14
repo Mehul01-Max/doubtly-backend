@@ -91,12 +91,14 @@ authRouter.post("/signin", async (req, res) => {
       { userId: user._id },
       process.env.REFRESH_TOKEN,
       {
-        expiresIn: "7d",
+        expiresIn: "4d",
       }
     );
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
+      secure: true,
       sameSite: "None",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return res.json({ token, message: "Login Successful" });
   } catch (e) {
@@ -107,17 +109,31 @@ authRouter.post("/signin", async (req, res) => {
   }
 });
 authRouter.post("/refreshToken", async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
-  if (!refreshToken) {
-    return res.status(400).json({
-      message: "invalid refresh token",
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    // console.log(refreshToken);
+    if (!refreshToken) {
+      return res.status(400).json({
+        message: "invalid refresh token",
+      });
+    }
+    const verify = jwt.verify(refreshToken, process.env.REFRESH_TOKEN);
+    if (!verify) {
+      return res.status(400).json({
+        message: "invalid refresh token",
+      });
+    }
+    const token = jwt.sign({ userId: verify.userId }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    // console.log(token);
+    res.json({ token });
+  } catch (e) {
+    console.log(e);
+    res.status(400).json({
+      message: "error occurred check console",
     });
   }
-  const token = jwt.sign({ userId: req.userId }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-  });
-
-  res.json({ token });
 });
 
 module.exports = { authRouter };

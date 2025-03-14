@@ -15,13 +15,12 @@ const userMiddleware = (req, res, next) => {
         message: "Invalid Authentication token",
       });
     }
-    // jwt.verify(refreshToken, process.env.REFRESH_TOKEN, (err, user) => {
-    //   if (err) {
-    //     return res.status(400).json({
-    //       message: "Invalid Refresh token",
-    //     });
-    //   }
-    // });
+    const refreshVerify = jwt.verify(refreshToken, process.env.REFRESH_TOKEN);
+    if (!refreshVerify) {
+      return res.status(400).json({
+        message: "Invalid Refresh token",
+      });
+    }
     req.userId = verify.userId;
     next();
   } catch (e) {
@@ -30,6 +29,7 @@ const userMiddleware = (req, res, next) => {
         message: "token expired",
       });
     } else if (e.name === "JsonWebTokenError") {
+      console.log(e);
       return res.status(401).json({
         message: "invalid authentication token",
       });
