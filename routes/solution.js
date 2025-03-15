@@ -5,6 +5,7 @@ const { DoubtDB } = require("../models/DoubtDB");
 const { SolutionDB } = require("../models/SolutionDB");
 const { userMiddleware } = require("../middleware/userMiddleware");
 const { SolutionsUpVotesDB } = require("../models/SolutionsUpVotesDB");
+const { formattedSolutions } = require("../utils");
 solution.post("/add/:questionId", userMiddleware, async (req, res) => {
   try {
     const { questionId } = req.params;
@@ -116,8 +117,9 @@ solution.get("/show/:questionId", userMiddleware, async (req, res) => {
       message: "no solution exists yet",
     });
   }
+  const formattedSols = await formattedSolutions(allReventSol);
   return res.json({
-    result: allReventSol,
+    result: formattedSols,
   });
 });
 solution.put("/updateUpVotes/:solutionID", userMiddleware, async (req, res) => {

@@ -35,6 +35,40 @@ const getTimeAgo = (date) => {
   return `${diffInYears}y ago`;
 };
 
+const formattedSolutions = async (Solution) => {
+  if (!Solution) {
+    res.json({
+      message: "no solution available",
+    });
+  }
+  const userIds = [...new Set(Solution.map((s) => s.userID))];
+  const users = await UserDB.find({ _id: { $in: userIds } });
+  const userMap = {};
+  users.forEach((user) => {
+    userMap[user._id] = user.name;
+  });
+  const solutionIds = Solution.map((d) => d._id);
+  const formattedS = Solution.map((d) => {
+    const userName = userMap[d.userID];
+    return formattedSolution(d, userName);
+  });
+  return formattedS;
+};
+const formattedSolution = (d, userName) => {
+  const timeAgo = getTimeAgo(d.addDate);
+  let modifiedDate = null;
+  if (typeof modifiedDate == Number) {
+    modifiedDate = getTimeAgo(d.modifiedDate);
+  }
+  return {
+    id: d._id,
+    solution: d.solution,
+    username: userName || "Unknown User",
+    upvotes: d.upVotes || 0,
+    timeAgo: timeAgo,
+    modifiedDate: modifiedDate || null,
+  };
+};
 const formattedDoubts = async (Doubt) => {
   if (!Doubt) {
     res.json({
@@ -89,4 +123,5 @@ module.exports = {
   getTimeAgo,
   formattedDoubts,
   formattedDoubt,
+  formattedSolutions,
 };
