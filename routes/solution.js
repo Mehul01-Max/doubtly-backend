@@ -8,6 +8,9 @@ const { SolutionsUpVotesDB } = require("../models/SolutionsUpVotesDB");
 solution.post("/add/:questionId", userMiddleware, async (req, res) => {
   try {
     const { questionId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(questionId)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
     const { solution } = req.body;
     const doubt = await DoubtDB.find({ _id: questionId });
     if (doubt.length === 0) {
@@ -42,6 +45,9 @@ solution.post("/add/:questionId", userMiddleware, async (req, res) => {
 solution.put("/modify/:solutionId", userMiddleware, async (req, res) => {
   try {
     const { solutionId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(solutionId)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
     const { solution } = req.body;
     let Solution = await SolutionDB.findById(solutionId);
     if (req.userId != Solution.userID) {
@@ -73,6 +79,9 @@ solution.put("/modify/:solutionId", userMiddleware, async (req, res) => {
 solution.delete("/delete/:solutionId", userMiddleware, async (req, res) => {
   try {
     const { solutionId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(solutionId)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
     let Solution = await SolutionDB.findById(solutionId);
     if (req.userId != Solution.userID) {
       return res.status(400).json({
@@ -92,6 +101,9 @@ solution.delete("/delete/:solutionId", userMiddleware, async (req, res) => {
 });
 solution.get("/show/:questionId", userMiddleware, async (req, res) => {
   const { questionId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(questionId)) {
+    return res.status(400).json({ error: "Invalid ID format" });
+  }
   const doubt = await DoubtDB.find({ _id: questionId });
   if (doubt.length === 0) {
     return res.json({
@@ -100,7 +112,9 @@ solution.get("/show/:questionId", userMiddleware, async (req, res) => {
   }
   const allReventSol = await SolutionDB.find({ doubtID: questionId });
   if (allReventSol === 0) {
-    message: "no solution exists yet";
+    return res.json({
+      message: "no solution exists yet",
+    });
   }
   return res.json({
     result: allReventSol,
@@ -109,6 +123,9 @@ solution.get("/show/:questionId", userMiddleware, async (req, res) => {
 solution.put("/updateUpVotes/:solutionID", userMiddleware, async (req, res) => {
   try {
     const { solutionID } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(solutionID)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
     const upVoted = await SolutionsUpVotesDB.findOne({
       solutionID,
       userID: req.userId,

@@ -16,6 +16,9 @@ comment.post("/add/:solutionID", userMiddleware, (req, res) => {
       });
     }
     const { solutionID } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(solutionID)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
     const newComment = new CommentDB({
       solutionID,
       userID: req.userId,
@@ -37,6 +40,9 @@ comment.post("/add/:solutionID", userMiddleware, (req, res) => {
 comment.put("/modify/:commentID", userMiddleware, async (req, res) => {
   try {
     const { commentID } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(commentID)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
     const { comment } = req.body;
     let com = await CommentDB.findById(commentID);
     if (!com) {
@@ -76,6 +82,9 @@ comment.put("/modify/:commentID", userMiddleware, async (req, res) => {
 comment.delete("/delete/:commentID", userMiddleware, async (req, res) => {
   try {
     const { commentID } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(commentID)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
     let com = await CommentDB.findById(commentID);
     console.log(commentID);
     if (!com) {
@@ -103,6 +112,9 @@ comment.delete("/delete/:commentID", userMiddleware, async (req, res) => {
 comment.get("/show/:solutionID", userMiddleware, async (req, res) => {
   try {
     const { solutionID } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(solutionID)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
     const comments = await CommentDB.find({ solutionID });
     console.log(solutionID);
     if (!comments) {

@@ -43,6 +43,9 @@ doubt.post("/add", userMiddleware, async (req, res) => {
 doubt.put("/modify/:doubtid", userMiddleware, async (req, res) => {
   try {
     const { doubtId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(doubtId)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
     const { heading, description, type } = req.body;
     let Doubt = await DoubtDB.findById(doubtId);
     if (req.userId != Doubt.userID) {
@@ -73,6 +76,9 @@ doubt.put("/modify/:doubtid", userMiddleware, async (req, res) => {
 doubt.delete("/delete/:doubtId", userMiddleware, async (req, res) => {
   try {
     const { doubtId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(doubtId)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
     let Doubt = await DoubtDB.findById(doubtId);
     if (req.userId != Doubt.userID) {
       return res.status(400).json({
@@ -134,6 +140,9 @@ doubt.get("/show/:techStack", userMiddleware, async (req, res) => {
 doubt.get("/show/id/:doubtId", userMiddleware, async (req, res) => {
   try {
     const { doubtId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(doubtId)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
     const Doubt = await DoubtDB.findById(doubtId);
     const userName = await UserDB.findById(Doubt.userID);
     const solution = await SolutionDB.find({ doubtID: doubtId._id });
@@ -156,6 +165,9 @@ doubt.get("/show/id/:doubtId", userMiddleware, async (req, res) => {
 doubt.put("/updateUpVotes/:questionID", userMiddleware, async (req, res) => {
   try {
     const { questionID } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(questionID)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
     const upVoted = await questionsUpVotesDB.findOne({
       questionID,
       userID: req.userId,
