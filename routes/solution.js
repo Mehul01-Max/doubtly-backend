@@ -21,7 +21,7 @@ solution.post("/add/:questionId", userMiddleware, async (req, res) => {
     }
     if (!solution) {
       return res.status(400).json({
-        message: "heading, description and type are required",
+        message: "solution is required",
       });
     }
     const newDoubt = new SolutionDB({
@@ -31,7 +31,15 @@ solution.post("/add/:questionId", userMiddleware, async (req, res) => {
       status: "pending",
       addDate: new Date(),
     });
-    newDoubt.save();
+    await newDoubt.save();
+    const AnswerCount = await SolutionDB.countDocuments({
+      doubtID: questionId,
+    });
+    await DoubtDB.findByIdAndUpdate(
+      questionId,
+      { AnswerCount },
+      { runValidators: true }
+    );
     return res.json({
       message: "solution added",
     });
@@ -90,11 +98,23 @@ solution.delete("/delete/:solutionId", userMiddleware, async (req, res) => {
           "You are not allowed to delete this solution as you are not the author",
       });
     }
+    const questionId = await SolutionDB.findById(solutionId);
+    console.log(questionId);
     await SolutionDB.findByIdAndDelete(solutionId);
+    const AnswerCount = await SolutionDB.countDocuments({
+      doubtID: questionId.doubtID,
+    });
+    console.log(AnswerCount);
+    await DoubtDB.findByIdAndUpdate(
+      questionId.doubtID,
+      { AnswerCount },
+      { runValidators: true }
+    );
     return res.json({
       message: "solution deleted",
     });
   } catch (e) {
+    console.log(e);
     return res.json({
       message: "Internal server error",
     });

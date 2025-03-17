@@ -81,25 +81,16 @@ const formattedDoubts = async (Doubt) => {
   users.forEach((user) => {
     userMap[user._id] = user.name;
   });
-  const doubtIds = Doubt.map((d) => d._id);
-  const solutionCounts = await SolutionDB.aggregate([
-    { $match: { doubtID: { $in: doubtIds.map((id) => id.toString()) } } },
-    { $group: { _id: "$doubtID", count: { $sum: 1 } } },
-  ]);
-  const solutionCountMap = {};
-  solutionCounts.forEach((item) => {
-    solutionCountMap[item._id] = item.count;
-  });
   const formattedD = Doubt.map((d) => {
     const userName = userMap[d.userID];
-    // console.log(d.userID);
-    const solutionCount = solutionCounts[d._id.toString()];
-    return formattedDoubt(d, userName, solutionCount);
+    // // console.log(d.userID);
+    // const solutionCount = solutionCounts[d._id.toString()];
+    return formattedDoubt(d, userName);
   });
 
   return formattedD;
 };
-const formattedDoubt = (d, userName, solutionCount) => {
+const formattedDoubt = (d, userName) => {
   const timeAgo = getTimeAgo(d.addDate);
   let modifiedDate = null;
   if (typeof modifiedDate == Number) {
@@ -113,7 +104,7 @@ const formattedDoubt = (d, userName, solutionCount) => {
     description: d.description,
     tags: tags,
     username: userName || "Unknown User",
-    answerCount: solutionCount || 0,
+    answerCount: d.AnswerCount || 0,
     upvotes: d.upVotes || 0,
     timeAgo: timeAgo,
     modifiedDate: modifiedDate || null,

@@ -17,11 +17,23 @@ const doubtSchema = new mongoose.Schema({
     type: String,
     required: true,
     lowercase: true,
-    enum: ["frontend", "backend", "dsa", "maths", "ai/ml"],
+    enum: ["frontend", "backend", "dsa", "maths", "ai/ml", "miscellaneous"],
   },
   status: {
     type: Boolean,
     required: true,
+  },
+  AnswerCount: {
+    type: Number,
+    default: 0,
+  },
+  views: {
+    type: Number,
+    default: 0,
+  },
+  commentCount: {
+    type: Number,
+    default: 0,
   },
   addDate: {
     type: Date,
@@ -32,6 +44,7 @@ const doubtSchema = new mongoose.Schema({
   },
   upVotes: {
     type: Number,
+    default: 0,
   },
 });
 const DoubtDB = mongoose.model("Doubt", doubtSchema);

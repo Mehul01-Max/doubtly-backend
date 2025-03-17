@@ -7,7 +7,7 @@ const { CommentDB } = require("../models/CommentDB");
 const { UserDB } = require("../models/UserDB");
 const { SolutionDB } = require("../models/SolutionDB");
 
-comment.post("/add/:solutionID", userMiddleware, (req, res) => {
+comment.post("/add/:solutionID", userMiddleware, async (req, res) => {
   try {
     const { comment } = req.body;
     if (!comment) {
@@ -25,7 +25,24 @@ comment.post("/add/:solutionID", userMiddleware, (req, res) => {
       comment,
       addDate: new Date(),
     });
-    newComment.save();
+    await newComment.save();
+    const commentCount = await CommentDB.countDocuments({ solutionID });
+    await SolutionDB.findByIdAndUpdate(
+      solutionID,
+      { commentCount },
+      { runValidators: true }
+    );
+    const questionId = await SolutionDB.findById(solutionID);
+    const solutions = await SolutionDB.find({ doubtID: questionId.doubtID });
+    // console.log(solutions);
+    const totalCommentCount = solutions.reduce(
+      (sum, solution) => sum + (solution.commentCount || 0),
+      0
+    );
+    // console.log(totalCommentCount);
+    await DoubtDB.findByIdAndUpdate(questionId.doubtID, {
+      commentCount: totalCommentCount,
+    });
     return res.json({
       message: "comment created",
     });
@@ -86,20 +103,42 @@ comment.delete("/delete/:commentID", userMiddleware, async (req, res) => {
       return res.status(400).json({ error: "Invalid ID format" });
     }
     let com = await CommentDB.findById(commentID);
-    console.log(commentID);
+    // console.log(commentID);
     if (!com) {
       return res.status(400).json({
         message: "not a valid comment id",
       });
     }
     if (req.userId != com.userID) {
-      console.log(req.userId + " " + com);
+      // console.log(req.userId + " " + com);
       return res.status(400).json({
         message:
           "You are not allowed to delete this comment as you are not the author",
       });
     }
+    const solutionID = await CommentDB.findById(commentID);
+    // console.log(solutionID.solutionID);
     await CommentDB.findByIdAndDelete(commentID);
+    const commentCount = await CommentDB.countDocuments({
+      solutionID: solutionID.solutionID,
+    });
+    // console.log(commentCount);
+    await SolutionDB.findByIdAndUpdate(
+      solutionID.solutionID,
+      { commentCount },
+      { runValidators: true }
+    );
+    const questionId = await SolutionDB.findById(solutionID.solutionID);
+    const solutions = await SolutionDB.find({ doubtID: questionId.doubtID });
+    // console.log(solutions);
+    const totalCommentCount = solutions.reduce(
+      (sum, solution) => sum + (solution.commentCount || 0),
+      0
+    );
+    // console.log(totalCommentCount);
+    await DoubtDB.findByIdAndUpdate(questionId.doubtID, {
+      commentCount: totalCommentCount,
+    });
     return res.json({
       message: "comment Deleted",
     });

@@ -13,6 +13,10 @@ const solutionSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  commentCount: {
+    type: Number,
+    default: 0,
+  },
   addDate: {
     type: Date,
     required: true,

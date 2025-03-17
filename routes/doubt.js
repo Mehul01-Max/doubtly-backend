@@ -19,7 +19,7 @@ doubt.post("/add", userMiddleware, async (req, res) => {
         message: "heading, description and type are required",
       });
     }
-    console.log(req.userId);
+    // console.log(req.userId);
     const newDoubt = new DoubtDB({
       userID: req.userId,
       heading,
@@ -203,6 +203,35 @@ doubt.get("/mydoubt", userMiddleware, async (req, res) => {
       });
     }
     const formattedJSON = await formattedDoubts(Doubt);
+    return res.json({
+      result: formattedJSON,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.json({
+      message: "Internal server error",
+    });
+  }
+});
+doubt.put("/viewsUpdate/:questionId", userMiddleware, async (req, res) => {
+  try {
+    const { questionId } = req.params;
+    await DoubtDB.findByIdAndUpdate(questionId, { $inc: { views: 1 } });
+    return res.json({
+      message: "views updated successfully",
+    });
+  } catch (e) {
+    console.log(e);
+    return res.json({
+      message: "Internal Server error",
+    });
+  }
+});
+doubt.get("/trending", userMiddleware, async (req, res) => {
+  try {
+    const Doubt = await DoubtDB.find();
+    const formattedJSON = await formattedDoubts(Doubt);
+
     return res.json({
       result: formattedJSON,
     });
