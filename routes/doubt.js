@@ -9,6 +9,7 @@ const {
   getTimeAgo,
   formattedDoubts,
   formattedDoubt,
+  calculateTrendingScore,
 } = require("../utils/index");
 const { questionsUpVotesDB } = require("../models/questionsUpVotesDB");
 doubt.post("/add", userMiddleware, async (req, res) => {
@@ -230,8 +231,26 @@ doubt.put("/viewsUpdate/:questionId", userMiddleware, async (req, res) => {
 doubt.get("/trending", userMiddleware, async (req, res) => {
   try {
     const Doubt = await DoubtDB.find();
+    const updatedDoubts = Doubt.map((doubt) => ({
+      ...doubt._doc,
+      trendingScore: calculateTrendingScore(doubt),
+    }));
+    updatedDoubts.sort((a, b) => b.trendingScore - a.trendingScore);
+    const formattedJSON = await formattedDoubts(updatedDoubts);
+    return res.json({
+      result: formattedJSON,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.json({
+      message: "Internal server error",
+    });
+  }
+});
+doubt.get("/latest", userMiddleware, async (req, res) => {
+  try {
+    const Doubt = await DoubtDB.find().sort({ addDate: -1 });
     const formattedJSON = await formattedDoubts(Doubt);
-
     return res.json({
       result: formattedJSON,
     });

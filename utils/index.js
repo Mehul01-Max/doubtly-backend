@@ -110,9 +110,26 @@ const formattedDoubt = (d, userName) => {
     modifiedDate: modifiedDate || null,
   };
 };
+const calculateAgeInDays = (date) => {
+  const now = new Date();
+  const createdDate = new Date(date);
+  const diffTime = Math.abs(now - createdDate);
+  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+};
+const calculateTrendingScore = (doubt) => {
+  const ageInDays = calculateAgeInDays(doubt.addDate);
+  return (
+    doubt.views * 0.3 +
+    doubt.AnswerCount * 2 +
+    doubt.upVotes * 3 +
+    doubt.commentCount * 1.5 -
+    ageInDays * 0.5
+  );
+};
 module.exports = {
   getTimeAgo,
   formattedDoubts,
   formattedDoubt,
   formattedSolutions,
+  calculateTrendingScore,
 };
