@@ -2,7 +2,8 @@
 const { SolutionDB } = require("../models/SolutionDB");
 const { UserDB } = require("../models/UserDB");
 const { DoubtDB } = require("../models/DoubtDB");
-
+const { questionsUpVotesDB } = require("../models/questionsUpVotesDB");
+const { SolutionsUpVotesDB } = require("../models/SolutionsUpVotesDB");
 const getTimeAgo = (date) => {
   const now = new Date();
   const diffInSeconds = Math.floor((now - date) / 1000);
@@ -35,7 +36,7 @@ const getTimeAgo = (date) => {
   return `${diffInYears}y ago`;
 };
 
-const formattedSolutions = async (Solution) => {
+const formattedSolutions = async (Solution, req) => {
   if (!Solution) {
     res.json({
       message: "no solution available",
@@ -48,13 +49,19 @@ const formattedSolutions = async (Solution) => {
     userMap[user._id] = user.name;
   });
   const solutionIds = Solution.map((d) => d._id);
-  const formattedS = Solution.map((d) => {
-    const userName = userMap[d.userID];
-    return formattedSolution(d, userName);
-  });
+  const formattedS = await Promise.all(
+    Solution.map(async (d) => {
+      const userName = userMap[d.userID];
+      const isUpvoted = await SolutionsUpVotesDB.find({
+        userID: req.userId,
+        solutionID: d._id,
+      });
+      return formattedSolution(d, userName, isUpvoted);
+    })
+  );
   return formattedS;
 };
-const formattedSolution = (d, userName) => {
+const formattedSolution = (d, userName, isUpvoted) => {
   const timeAgo = getTimeAgo(d.addDate);
   let modifiedDate = null;
   if (typeof modifiedDate == Number) {
@@ -67,9 +74,10 @@ const formattedSolution = (d, userName) => {
     upvotes: d.upVotes || 0,
     timeAgo: timeAgo,
     modifiedDate: modifiedDate || null,
+    isUpvoted: isUpvoted.length === 0 ? false : true,
   };
 };
-const formattedDoubts = async (Doubt) => {
+const formattedDoubts = async (Doubt, req) => {
   if (!Doubt) {
     res.json({
       message: "no doubt available",
@@ -81,16 +89,21 @@ const formattedDoubts = async (Doubt) => {
   users.forEach((user) => {
     userMap[user._id] = user.name;
   });
-  const formattedD = Doubt.map((d) => {
-    const userName = userMap[d.userID];
-    // // console.log(d.userID);
-    // const solutionCount = solutionCounts[d._id.toString()];
-    return formattedDoubt(d, userName);
-  });
+  const formattedD = await Promise.all(
+    Doubt.map(async (d) => {
+      const userName = userMap[d.userID];
+      const isUpvoted = await questionsUpVotesDB.find({
+        userID: req.userId,
+        questionID: d._id,
+      });
+      // console.log(formattedDoubt(d, userName, isUpvoted));
+      return formattedDoubt(d, userName, isUpvoted);
+    })
+  );
 
   return formattedD;
 };
-const formattedDoubt = (d, userName) => {
+const formattedDoubt = (d, userName, isUpvoted) => {
   const timeAgo = getTimeAgo(d.addDate);
   let modifiedDate = null;
   if (typeof modifiedDate == Number) {
@@ -108,6 +121,7 @@ const formattedDoubt = (d, userName) => {
     upvotes: d.upVotes || 0,
     timeAgo: timeAgo,
     modifiedDate: modifiedDate || null,
+    isUpvoted: isUpvoted.length === 0 ? false : true,
   };
 };
 const calculateAgeInDays = (date) => {

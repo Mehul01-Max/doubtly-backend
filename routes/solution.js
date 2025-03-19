@@ -131,13 +131,15 @@ solution.get("/show/:questionId", userMiddleware, async (req, res) => {
       message: "invalid id! no doubt with this id exists",
     });
   }
-  const allReventSol = await SolutionDB.find({ doubtID: questionId });
+  const allReventSol = await SolutionDB.find({ doubtID: questionId }).sort({
+    upVotes: -1,
+  });
   if (allReventSol === 0) {
     return res.json({
       message: "no solution exists yet",
     });
   }
-  const formattedSols = await formattedSolutions(allReventSol);
+  const formattedSols = await formattedSolutions(allReventSol, req);
   return res.json({
     result: formattedSols,
   });

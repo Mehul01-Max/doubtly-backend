@@ -101,7 +101,7 @@ doubt.delete("/delete/:doubtId", userMiddleware, async (req, res) => {
 doubt.get("/showAll", userMiddleware, async (req, res) => {
   try {
     const Doubt = await DoubtDB.find();
-    const formattedJSON = await formattedDoubts(Doubt);
+    const formattedJSON = await formattedDoubts(Doubt, req);
     return res.json({
       result: formattedJSON,
     });
@@ -127,7 +127,7 @@ doubt.get("/show/:techStack", userMiddleware, async (req, res) => {
         message: "currently this doubt type is empty",
       });
     }
-    const formattedJSON = await formattedDoubts(Doubt);
+    const formattedJSON = await formattedDoubts(Doubt, req);
     return res.json({
       result: formattedJSON,
     });
@@ -203,7 +203,7 @@ doubt.get("/mydoubt", userMiddleware, async (req, res) => {
         message: "currently this doubt type is empty",
       });
     }
-    const formattedJSON = await formattedDoubts(Doubt);
+    const formattedJSON = await formattedDoubts(Doubt, req);
     return res.json({
       result: formattedJSON,
     });
@@ -236,7 +236,7 @@ doubt.get("/trending", userMiddleware, async (req, res) => {
       trendingScore: calculateTrendingScore(doubt),
     }));
     updatedDoubts.sort((a, b) => b.trendingScore - a.trendingScore);
-    const formattedJSON = await formattedDoubts(updatedDoubts);
+    const formattedJSON = await formattedDoubts(updatedDoubts, req);
     return res.json({
       result: formattedJSON,
     });
@@ -250,7 +250,7 @@ doubt.get("/trending", userMiddleware, async (req, res) => {
 doubt.get("/latest", userMiddleware, async (req, res) => {
   try {
     const Doubt = await DoubtDB.find().sort({ addDate: -1 });
-    const formattedJSON = await formattedDoubts(Doubt);
+    const formattedJSON = await formattedDoubts(Doubt, req);
     return res.json({
       result: formattedJSON,
     });
