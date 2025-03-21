@@ -16,7 +16,10 @@ userDetails.get("/", userMiddleware, async (req, res) => {
         message: "invalid userId",
       });
     }
-    const doubtAsked = await DoubtDB.countDocuments({ userID: req.userId });
+    const doubtAsked = await DoubtDB.find({ userID: req.userId });
+    const doubtAskedLastWeek = doubtAsked.filter(
+      (c) => new Date() - c.addDate < 604800000
+    );
     const doubtAnswered = await SolutionDB.find({
       userID: req.userId,
     });
@@ -40,7 +43,8 @@ userDetails.get("/", userMiddleware, async (req, res) => {
     const userDetails = {
       firstName: user.name.split(" ")[0],
       email: user.email,
-      doubtAsked: doubtAsked,
+      doubtAsked: doubtAsked.length,
+      doubtAskedLastWeek: doubtAskedLastWeek.length,
       joinedDate: user.JoinedDate,
       answersGiven: doubtAnswered.length,
       correctlyAnswered: correctlyAnswered.length,
