@@ -39,6 +39,7 @@ userDetails.get("/", userMiddleware, async (req, res) => {
     });
     const userDetails = {
       firstName: user.name.split(" ")[0],
+      email: user.email,
       doubtAsked: doubtAsked,
       joinedDate: user.JoinedDate,
       answersGiven: doubtAnswered.length,
