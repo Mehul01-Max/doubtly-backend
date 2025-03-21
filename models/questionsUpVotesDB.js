@@ -9,6 +9,10 @@ const questionsUpVotesSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  upvoteDate: {
+    type: Date,
+    required: true,
+  },
 });
 
 const questionsUpVotesDB = mongoose.model(

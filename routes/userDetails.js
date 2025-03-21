@@ -2,10 +2,13 @@ const { Router } = require("express");
 const mongoose = require("mongoose");
 const { UserDB } = require("../models/UserDB");
 const { userMiddleware } = require("../middleware/userMiddleware");
+const { DoubtDB } = require("../models/DoubtDB");
+const { SolutionDB } = require("../models/SolutionDB");
+const { SolutionsUpVotesDB } = require("../models/SolutionsUpVotesDB");
 
 const userDetails = Router();
 
-userDetails.get("/dashboard", userMiddleware, async (req, res) => {
+userDetails.get("/", userMiddleware, async (req, res) => {
   try {
     const user = await UserDB.findOne({ _id: req.userId });
     if (!user) {
@@ -13,8 +16,38 @@ userDetails.get("/dashboard", userMiddleware, async (req, res) => {
         message: "invalid userId",
       });
     }
+    const doubtAsked = await DoubtDB.countDocuments({ userID: req.userId });
+    const doubtAnswered = await SolutionDB.find({
+      userID: req.userId,
+    });
+    const correctlyAnswered = await SolutionDB.find({
+      userID: req.userId,
+      status: "correct",
+    });
+    const correctlyAnsweredLastweek = correctlyAnswered.filter(
+      (c) => new Date() - c.addDate < 604800000
+    );
+    const upvotes = doubtAnswered.reduce((acc, curr) => {
+      return (acc = acc + (curr.upVotes || 0));
+    }, 0);
+    const solutionIDs = doubtAnswered.map((d) => d._id);
+    const upvoteList = await SolutionsUpVotesDB.find({
+      solutionID: { $in: solutionIDs },
+    });
+    const upvoteLastWeek = upvoteList.filter((d) => {
+      return new Date() - d.upvoteDate < 604800000;
+    });
     const userDetails = {
-      name: user.name.split(" ")[0],
+      firstName: user.name.split(" ")[0],
+      doubtAsked: doubtAsked,
+      joinedDate: user.JoinedDate,
+      answersGiven: doubtAnswered.length,
+      correctlyAnswered: correctlyAnswered.length,
+      acceptance: correctlyAnswered.length / doubtAnswered.length,
+      correctlyAnsweredLastweek: correctlyAnsweredLastweek.length,
+      upvotes: upvotes,
+      upvoteLastWeek: upvoteLastWeek.length,
+      fullName: user.name,
       points: user.points,
     };
     return res.json({
@@ -29,3 +62,4 @@ userDetails.get("/dashboard", userMiddleware, async (req, res) => {
 });
 
 module.exports = { userDetails };
+// name, bio, email, joinedDate,  doubt asked, answersGiven, acceptance

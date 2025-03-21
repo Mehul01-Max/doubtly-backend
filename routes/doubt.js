@@ -177,6 +177,7 @@ doubt.put("/updateUpVotes/:questionID", userMiddleware, async (req, res) => {
       const newUpVote = new questionsUpVotesDB({
         questionID,
         userID: req.userId,
+        upvoteDate: new Date(),
       });
       await newUpVote.save();
     } else {

@@ -158,6 +158,7 @@ solution.put("/updateUpVotes/:solutionID", userMiddleware, async (req, res) => {
       const newUpVote = new SolutionsUpVotesDB({
         solutionID,
         userID: req.userId,
+        upvoteDate: new Date(),
       });
       await newUpVote.save();
     } else {
