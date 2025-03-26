@@ -123,6 +123,7 @@ const formattedDoubt = (d, userName, isUpvoted, isUserDoubt) => {
     answerCount: d.AnswerCount || 0,
     upvotes: d.upVotes || 0,
     timeAgo: timeAgo,
+    date: d.addDate,
     modifiedDate: modifiedDate || null,
     isUpvoted: isUpvoted.length === 0 ? false : true,
     isUserDoubt: isUserDoubt,
