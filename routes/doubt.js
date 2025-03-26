@@ -26,7 +26,7 @@ doubt.post("/add", userMiddleware, async (req, res) => {
       heading,
       description,
       type,
-      status: false,
+      status: "no solution available",
       addDate: new Date(),
     });
     newDoubt.save();
