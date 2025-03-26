@@ -113,21 +113,32 @@ doubt.get("/showAll", userMiddleware, async (req, res) => {
   }
 });
 const allowedTypes = DoubtDB.schema.path("type").enumValues;
-doubt.get("/show/:techStack", userMiddleware, async (req, res) => {
+doubt.get("/show/", userMiddleware, async (req, res) => {
   try {
-    const { techStack } = req.params;
-    if (!allowedTypes.includes(techStack)) {
+    const techStack = req.query.stack;
+    const type = req.query.type;
+    if (techStack && !allowedTypes.includes(techStack)) {
       return res.status(404).json({
         message: "this doubt type doesn't exist",
       });
     }
-    const Doubt = await DoubtDB.find({ type: techStack });
+    const query = {};
+    if (techStack) query.type = techStack;
+    if (type === "unanswered") query.status = false;
+    const Doubt = await DoubtDB.find(query);
     if (Doubt.length === 0) {
       return res.json({
         message: "currently this doubt type is empty",
       });
     }
-    const formattedJSON = await formattedDoubts(Doubt, req);
+    let formattedJSON = Doubt;
+    const updatedDoubts = Doubt.map((doubt) => ({
+      ...doubt._doc,
+      trendingScore: calculateTrendingScore(doubt),
+    }));
+    updatedDoubts.sort((a, b) => b.trendingScore - a.trendingScore);
+
+    formattedJSON = await formattedDoubts(updatedDoubts, req);
     return res.json({
       result: formattedJSON,
     });

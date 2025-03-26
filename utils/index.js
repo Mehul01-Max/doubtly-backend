@@ -56,12 +56,13 @@ const formattedSolutions = async (Solution, req) => {
         userID: req.userId,
         solutionID: d._id,
       });
-      return formattedSolution(d, userName, isUpvoted);
+      const isUserSol = d.userID === req.userId;
+      return formattedSolution(d, userName, isUpvoted, isUserSol);
     })
   );
   return formattedS;
 };
-const formattedSolution = (d, userName, isUpvoted) => {
+const formattedSolution = (d, userName, isUpvoted, isUserSol) => {
   const timeAgo = getTimeAgo(d.addDate);
   let modifiedDate = null;
   if (typeof modifiedDate == Number) {
@@ -75,6 +76,7 @@ const formattedSolution = (d, userName, isUpvoted) => {
     timeAgo: timeAgo,
     modifiedDate: modifiedDate || null,
     isUpvoted: isUpvoted.length === 0 ? false : true,
+    isUserSol: isUserSol,
   };
 };
 const formattedDoubts = async (Doubt, req) => {
@@ -96,14 +98,15 @@ const formattedDoubts = async (Doubt, req) => {
         userID: req.userId,
         questionID: d._id,
       });
+      const isUserDoubt = d.userID === req.userId;
       // console.log(formattedDoubt(d, userName, isUpvoted));
-      return formattedDoubt(d, userName, isUpvoted);
+      return formattedDoubt(d, userName, isUpvoted, isUserDoubt);
     })
   );
 
   return formattedD;
 };
-const formattedDoubt = (d, userName, isUpvoted) => {
+const formattedDoubt = (d, userName, isUpvoted, isUserDoubt) => {
   const timeAgo = getTimeAgo(d.addDate);
   let modifiedDate = null;
   if (typeof modifiedDate == Number) {
@@ -122,6 +125,7 @@ const formattedDoubt = (d, userName, isUpvoted) => {
     timeAgo: timeAgo,
     modifiedDate: modifiedDate || null,
     isUpvoted: isUpvoted.length === 0 ? false : true,
+    isUserDoubt: isUserDoubt,
   };
 };
 const calculateAgeInDays = (date) => {
