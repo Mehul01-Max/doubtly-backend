@@ -27,6 +27,10 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  isEmailNotificationOn: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const UserDB = mongoose.model("User", UserSchema);

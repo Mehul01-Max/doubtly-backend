@@ -273,4 +273,5 @@ doubt.get("/latest", userMiddleware, async (req, res) => {
     });
   }
 });
+doubt.get;
 module.exports = { doubt };

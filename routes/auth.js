@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const { userMiddleware } = require("../middleware/userMiddleware");
 const { UserDB } = require("../models/UserDB");
 const mongoose = require("mongoose");
-
 const authRouter = Router();
 const isValidEmail = (email) => {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;

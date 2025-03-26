@@ -144,7 +144,33 @@ const calculateTrendingScore = (doubt) => {
     ageInDays * 0.5
   );
 };
+const updateDoubtStatus = async (doubtID) => {
+  const solutions = await SolutionDB.find({ doubtID });
+
+  let hasCorrect = false;
+  let hasPending = false;
+  let hasWrong = false;
+
+  solutions.forEach((sol) => {
+    if (sol.status === "correct") hasCorrect = true;
+    if (sol.status === "pending") hasPending = true;
+    if (sol.status === "wrong") hasWrong = true;
+  });
+
+  let newStatus = "No Solution Available";
+  if (hasCorrect) {
+    newStatus = "Verified Solution Available";
+  } else if (hasPending) {
+    newStatus = "Unverified Solution Available";
+  } else if (hasWrong) {
+    newStatus = "No Solution Available";
+  }
+
+  await DoubtDB.findByIdAndUpdate(doubtID, { status: newStatus });
+};
+
 module.exports = {
+  updateDoubtStatus,
   getTimeAgo,
   formattedDoubts,
   formattedDoubt,

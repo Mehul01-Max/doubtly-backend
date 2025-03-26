@@ -5,7 +5,11 @@ const { DoubtDB } = require("../models/DoubtDB");
 const { SolutionDB } = require("../models/SolutionDB");
 const { userMiddleware } = require("../middleware/userMiddleware");
 const { SolutionsUpVotesDB } = require("../models/SolutionsUpVotesDB");
-const { formattedSolutions } = require("../utils");
+const { formattedSolutions, updateDoubtStatus } = require("../utils");
+const { sendSolutionNotification } = require("../utils/emailService");
+const { UserDB } = require("../models/UserDB");
+const { questionsUpVotesDB } = require("../models/questionsUpVotesDB");
+const { NotificationDB } = require("../models/NotificationDB");
 solution.post("/add/:questionId", userMiddleware, async (req, res) => {
   try {
     const { questionId } = req.params;
@@ -40,6 +44,38 @@ solution.post("/add/:questionId", userMiddleware, async (req, res) => {
       { AnswerCount },
       { runValidators: true }
     );
+    const question = await DoubtDB.findById(questionId);
+    const user = await UserDB.findById(question.userID);
+    await sendSolutionNotification(
+      user.email,
+      question.heading,
+      `${process.env.WEBSITE_LINK}/dashboard/doubt/${questionId}`,
+      true
+    );
+    const upvotedUserId = await questionsUpVotesDB.find({
+      questionID: questionId,
+    });
+    const users = upvotedUserId.map((d) => {
+      if (question.userID != d.userID) {
+        return d.userID;
+      }
+    });
+    const newNotification = new NotificationDB({
+      userID: req.userId,
+      message: `A new solution was added to your doubt: "${question.title}`,
+      link: `${process.env.WEBSITE_LINK}/dashboard/doubt/${questionId}`,
+    });
+    await newNotification.save();
+    const upvotedUser = await UserDB.find({ _id: { $in: users } });
+    for (u of upvotedUser) {
+      await sendSolutionNotification(
+        u.email,
+        question.heading,
+        `${process.env.WEBSITE_LINK}/dashboard/doubt/${questionId}`,
+        false
+      );
+    }
+    await updateDoubtStatus(questionId);
     return res.json({
       message: "solution added",
     });
@@ -99,7 +135,6 @@ solution.delete("/delete/:solutionId", userMiddleware, async (req, res) => {
       });
     }
     const questionId = await SolutionDB.findById(solutionId);
-    console.log(questionId);
     await SolutionDB.findByIdAndDelete(solutionId);
     const AnswerCount = await SolutionDB.countDocuments({
       doubtID: questionId.doubtID,
@@ -110,6 +145,7 @@ solution.delete("/delete/:solutionId", userMiddleware, async (req, res) => {
       { AnswerCount },
       { runValidators: true }
     );
+    await updateDoubtStatus(questionId.doubtID);
     return res.json({
       message: "solution deleted",
     });
@@ -176,6 +212,30 @@ solution.put("/updateUpVotes/:solutionID", userMiddleware, async (req, res) => {
     console.log(e);
     return res.status(400).json({
       message: "Internal Server error",
+    });
+  }
+});
+solution.put("/updateStatus/:solutionID", userMiddleware, async (req, res) => {
+  try {
+    const { solutionID } = req.params;
+    const { status } = req.body;
+    if (!["pending", "wrong", "correct"].includes(status)) {
+      return res.status(400).json({ error: "Invalid status" });
+    }
+
+    const solution = await SolutionDB.findById(solutionID);
+    if (!solution) {
+      return res.status(404).json({ error: "Solution not found" });
+    }
+    await SolutionDB.findByIdAndUpdate(solutionID, { status: status });
+    await updateDoubtStatus(solution.doubtID);
+    res.json({
+      message: "status changed successfully",
+    });
+  } catch (e) {
+    console.log(e);
+    res.json({
+      message: "Internal server error",
     });
   }
 });

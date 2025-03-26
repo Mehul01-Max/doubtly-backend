@@ -5,7 +5,6 @@ const { userMiddleware } = require("../middleware/userMiddleware");
 const { DoubtDB } = require("../models/DoubtDB");
 const { SolutionDB } = require("../models/SolutionDB");
 const { SolutionsUpVotesDB } = require("../models/SolutionsUpVotesDB");
-
 const userDetails = Router();
 
 userDetails.get("/", userMiddleware, async (req, res) => {

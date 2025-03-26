@@ -20,8 +20,14 @@ const doubtSchema = new mongoose.Schema({
     enum: ["frontend", "backend", "dsa", "maths", "ai/ml", "miscellaneous"],
   },
   status: {
-    type: Boolean,
+    type: String,
     required: true,
+    lowercase: true,
+    enum: [
+      "no solution available",
+      "unverified solution available",
+      "verified solution available",
+    ],
   },
   AnswerCount: {
     type: Number,
