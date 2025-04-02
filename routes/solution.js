@@ -1,3 +1,4 @@
+require("dotenv").config();
 const { Router } = require("express");
 const solution = Router();
 const mongoose = require("mongoose");
@@ -10,6 +11,11 @@ const { sendSolutionNotification } = require("../utils/emailService");
 const { UserDB } = require("../models/UserDB");
 const { questionsUpVotesDB } = require("../models/questionsUpVotesDB");
 const { NotificationDB } = require("../models/NotificationDB");
+const { algoliasearch } = require("algoliasearch");
+const client = algoliasearch(
+  process.env.ALGOLIA_APPLICATION_ID,
+  process.env.ALGOLIA_API_KEY
+);
 solution.post("/add/:questionId", userMiddleware, async (req, res) => {
   try {
     const { questionId } = req.params;
@@ -39,11 +45,16 @@ solution.post("/add/:questionId", userMiddleware, async (req, res) => {
     const AnswerCount = await SolutionDB.countDocuments({
       doubtID: questionId,
     });
-    await DoubtDB.findByIdAndUpdate(
+    const d = await DoubtDB.findByIdAndUpdate(
       questionId,
       { AnswerCount },
-      { runValidators: true }
+      { runValidators: true, new: true }
     );
+    await client.addOrUpdateObject({
+      indexName: "doubt_index",
+      objectID: questionId,
+      body: d._doc,
+    });
     const question = await DoubtDB.findById(questionId);
     const user = await UserDB.findById(question.userID);
     await sendSolutionNotification(
@@ -140,11 +151,16 @@ solution.delete("/delete/:solutionId", userMiddleware, async (req, res) => {
       doubtID: questionId.doubtID,
     });
     console.log(AnswerCount);
-    await DoubtDB.findByIdAndUpdate(
+    const d = await DoubtDB.findByIdAndUpdate(
       questionId.doubtID,
       { AnswerCount },
-      { runValidators: true }
+      { runValidators: true, new: true }
     );
+    await client.addOrUpdateObject({
+      indexName: "doubt_index",
+      objectID: questionId.doubtID,
+      body: d._doc,
+    });
     await updateDoubtStatus(questionId.doubtID);
     return res.json({
       message: "solution deleted",

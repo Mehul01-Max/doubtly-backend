@@ -1,9 +1,14 @@
-// const { SolutionDB } = require('../models/SolutionDB');
+require("dotenv").config();
 const { SolutionDB } = require("../models/SolutionDB");
 const { UserDB } = require("../models/UserDB");
 const { DoubtDB } = require("../models/DoubtDB");
 const { questionsUpVotesDB } = require("../models/questionsUpVotesDB");
 const { SolutionsUpVotesDB } = require("../models/SolutionsUpVotesDB");
+const { algoliasearch } = require("algoliasearch");
+const client = algoliasearch(
+  process.env.ALGOLIA_APPLICATION_ID,
+  process.env.ALGOLIA_API_KEY
+);
 const getTimeAgo = (date) => {
   const now = new Date();
   const diffInSeconds = Math.floor((now - date) / 1000);
@@ -167,7 +172,16 @@ const updateDoubtStatus = async (doubtID) => {
     newStatus = "No Solution Available";
   }
 
-  await DoubtDB.findByIdAndUpdate(doubtID, { status: newStatus });
+  const d = await DoubtDB.findByIdAndUpdate(
+    doubtID,
+    { status: newStatus },
+    { runValidators: true, new: true }
+  );
+  await client.addOrUpdateObject({
+    indexName: "doubt_index",
+    objectID: doubtID,
+    body: d._doc,
+  });
 };
 
 module.exports = {

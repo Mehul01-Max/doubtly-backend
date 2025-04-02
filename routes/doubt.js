@@ -1,4 +1,10 @@
+require("dotenv").config();
 const { Router } = require("express");
+const { algoliasearch } = require("algoliasearch");
+const client = algoliasearch(
+  process.env.ALGOLIA_APPLICATION_ID,
+  process.env.ALGOLIA_API_KEY
+);
 const doubt = Router();
 const mongoose = require("mongoose");
 const { DoubtDB } = require("../models/DoubtDB");
@@ -26,10 +32,14 @@ doubt.post("/add", userMiddleware, async (req, res) => {
       heading,
       description,
       type,
-      status: "no solution available",
+      status: "No solution available",
       addDate: new Date(),
     });
     newDoubt.save();
+    await client.saveObject({
+      indexName: "doubt_index",
+      body: { objectID: newDoubt._doc._id, ...newDoubt._doc },
+    });
     return res.json({
       message: "doubt created",
     });
@@ -41,7 +51,7 @@ doubt.post("/add", userMiddleware, async (req, res) => {
   }
 });
 
-doubt.put("/modify/:doubtid", userMiddleware, async (req, res) => {
+doubt.put("/modify/:doubtId", userMiddleware, async (req, res) => {
   try {
     const { doubtId } = req.params;
     if (!mongoose.Types.ObjectId.isValid(doubtId)) {
@@ -60,11 +70,16 @@ doubt.put("/modify/:doubtid", userMiddleware, async (req, res) => {
         message: "heading, description and type are required",
       });
     }
-    await DoubtDB.findByIdAndUpdate(
+    const d = await DoubtDB.findByIdAndUpdate(
       doubtId,
       { heading, description, type, modifiedDate: new Date() },
-      { runValidators: true }
+      { runValidators: true, new: true }
     );
+    await client.addOrUpdateObject({
+      indexName: "doubt_index",
+      objectID: doubtId,
+      body: d._doc,
+    });
     return res.json({
       message: "doubt modified",
     });
@@ -89,6 +104,10 @@ doubt.delete("/delete/:doubtId", userMiddleware, async (req, res) => {
     }
     await DoubtDB.findByIdAndDelete(doubtId);
     await SolutionDB.deleteMany({ doubtID: doubtId });
+    await client.deleteObject({
+      indexName: "doubt_index",
+      objectID: doubtId,
+    });
     return res.json({
       message: "doubt deleted",
     });
@@ -196,7 +215,16 @@ doubt.put("/updateUpVotes/:questionID", userMiddleware, async (req, res) => {
       await questionsUpVotesDB.findByIdAndDelete(upVoted._id);
     }
     const upVotes = await questionsUpVotesDB.find({ questionID });
-    await DoubtDB.findByIdAndUpdate(questionID, { upVotes: upVotes.length });
+    const d = await DoubtDB.findByIdAndUpdate(
+      questionID,
+      { upVotes: upVotes.length },
+      { runValidators: true, new: true }
+    );
+    await client.addOrUpdateObject({
+      indexName: "doubt_index",
+      objectID: questionID,
+      body: d._doc,
+    });
     return res.json({
       message: "upvote updated",
     });
@@ -229,7 +257,16 @@ doubt.get("/mydoubt", userMiddleware, async (req, res) => {
 doubt.put("/viewsUpdate/:questionId", userMiddleware, async (req, res) => {
   try {
     const { questionId } = req.params;
-    await DoubtDB.findByIdAndUpdate(questionId, { $inc: { views: 1 } });
+    const d = await DoubtDB.findByIdAndUpdate(
+      questionId,
+      { $inc: { views: 1 } },
+      { runValidators: true, new: true }
+    );
+    await client.addOrUpdateObject({
+      indexName: "doubt_index",
+      objectID: questionId,
+      body: d._doc,
+    });
     return res.json({
       message: "views updated successfully",
     });
@@ -265,6 +302,22 @@ doubt.get("/latest", userMiddleware, async (req, res) => {
     const formattedJSON = await formattedDoubts(Doubt, req);
     return res.json({
       result: formattedJSON,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.json({
+      message: "Internal server error",
+    });
+  }
+});
+doubt.get("/search", userMiddleware, async (req, res) => {
+  try {
+    const q = req.query.q;
+    const response = await client.search({
+      requests: [{ indexName: "doubt_index", query: q }],
+    });
+    return res.json({
+      result: response.results[0]["hits"],
     });
   } catch (e) {
     console.log(e);

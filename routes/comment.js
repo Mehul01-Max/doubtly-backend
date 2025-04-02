@@ -1,3 +1,4 @@
+require("dotenv").config();
 const { Router } = require("express");
 const comment = Router();
 const mongoose = require("mongoose");
@@ -6,7 +7,11 @@ const { userMiddleware } = require("../middleware/userMiddleware");
 const { CommentDB } = require("../models/CommentDB");
 const { UserDB } = require("../models/UserDB");
 const { SolutionDB } = require("../models/SolutionDB");
-
+const { algoliasearch } = require("algoliasearch");
+const client = algoliasearch(
+  process.env.ALGOLIA_APPLICATION_ID,
+  process.env.ALGOLIA_API_KEY
+);
 comment.post("/add/:solutionID", userMiddleware, async (req, res) => {
   try {
     const { comment } = req.body;
@@ -40,8 +45,17 @@ comment.post("/add/:solutionID", userMiddleware, async (req, res) => {
       0
     );
     // console.log(totalCommentCount);
-    await DoubtDB.findByIdAndUpdate(questionId.doubtID, {
-      commentCount: totalCommentCount,
+    const d = await DoubtDB.findByIdAndUpdate(
+      questionId.doubtID,
+      {
+        commentCount: totalCommentCount,
+      },
+      { runValidators: true, new: true }
+    );
+    await client.addOrUpdateObject({
+      indexName: "doubt_index",
+      objectID: questionId.doubtID,
+      body: d._doc,
     });
     return res.json({
       message: "comment created",
@@ -136,8 +150,17 @@ comment.delete("/delete/:commentID", userMiddleware, async (req, res) => {
       0
     );
     // console.log(totalCommentCount);
-    await DoubtDB.findByIdAndUpdate(questionId.doubtID, {
-      commentCount: totalCommentCount,
+    const d = await DoubtDB.findByIdAndUpdate(
+      questionId.doubtID,
+      {
+        commentCount: totalCommentCount,
+      },
+      { runValidators: true, new: true }
+    );
+    await client.addOrUpdateObject({
+      indexName: "doubt_index",
+      objectID: questionId.doubtID,
+      body: d._doc,
     });
     return res.json({
       message: "comment Deleted",
