@@ -235,7 +235,7 @@ solution.put("/updateStatus/:solutionID", userMiddleware, async (req, res) => {
   try {
     const { solutionID } = req.params;
     const { status } = req.body;
-    if (!["pending", "wrong", "correct"].includes(status)) {
+    if (!["pending", "correct"].includes(status)) {
       return res.status(400).json({ error: "Invalid status" });
     }
 
