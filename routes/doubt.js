@@ -316,8 +316,9 @@ doubt.get("/search", userMiddleware, async (req, res) => {
     const response = await client.search({
       requests: [{ indexName: "doubt_index", query: q }],
     });
+    const doubts = await formattedDoubts(response.results[0]["hits"], req);
     return res.json({
-      result: response.results[0]["hits"],
+      result: doubts,
     });
   } catch (e) {
     console.log(e);
