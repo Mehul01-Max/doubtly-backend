@@ -27,7 +27,7 @@ const solutionSchema = mongoose.Schema({
   status: {
     type: String,
     required: true,
-    enum: ["pending", "correct", "wrong"],
+    enum: ["pending", "correct"],
   },
   upVotes: {
     type: Number,

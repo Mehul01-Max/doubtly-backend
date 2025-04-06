@@ -79,6 +79,7 @@ const formattedSolution = (d, userName, isUpvoted, isUserSol) => {
     username: userName || "Unknown User",
     upvotes: d.upVotes || 0,
     timeAgo: timeAgo,
+    isVerified: d.status,
     modifiedDate: modifiedDate || null,
     isUpvoted: isUpvoted.length === 0 ? false : true,
     isUserSol: isUserSol,
@@ -160,7 +161,6 @@ const updateDoubtStatus = async (doubtID) => {
   solutions.forEach((sol) => {
     if (sol.status === "correct") hasCorrect = true;
     if (sol.status === "pending") hasPending = true;
-    if (sol.status === "wrong") hasWrong = true;
   });
 
   let newStatus = "No Solution Available";
@@ -168,8 +168,6 @@ const updateDoubtStatus = async (doubtID) => {
     newStatus = "Verified Solution Available";
   } else if (hasPending) {
     newStatus = "Unverified Solution Available";
-  } else if (hasWrong) {
-    newStatus = "No Solution Available";
   }
 
   const d = await DoubtDB.findByIdAndUpdate(
