@@ -130,6 +130,7 @@ const formattedDoubt = (d, userName, isUpvoted, isUserDoubt) => {
     upvotes: d.upVotes || 0,
     timeAgo: timeAgo,
     date: d.addDate,
+    status: d.status,
     modifiedDate: modifiedDate || null,
     isUpvoted: isUpvoted.length === 0 ? false : true,
     isUserDoubt: isUserDoubt,
