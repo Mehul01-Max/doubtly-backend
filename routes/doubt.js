@@ -177,7 +177,12 @@ doubt.get("/show/id/:doubtId", userMiddleware, async (req, res) => {
     const Doubt = await DoubtDB.findById(doubtId);
     const userName = await UserDB.findById(Doubt.userID);
     const solution = await SolutionDB.find({ doubtID: doubtId._id });
-    const formatted = formattedDoubt(Doubt, userName.name, solution.length);
+    const formatted = formattedDoubt(
+      Doubt,
+      userName.name,
+      solution.length,
+      req.userId === Doubt.userID
+    );
     if (!Doubt) {
       return res.json({
         message: "not a valid doubt id",
