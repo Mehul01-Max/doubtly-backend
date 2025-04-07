@@ -11,6 +11,7 @@ const client = algoliasearch(
 );
 const getTimeAgo = (date) => {
   const now = new Date();
+  date = new Date(date);
   const diffInSeconds = Math.floor((now - date) / 1000);
 
   if (diffInSeconds < 60) {
