@@ -29,7 +29,7 @@ const sendSolutionNotification = async (
 
     await transporter.sendMail(mailOptions);
   } catch (e) {
-    console.error("Error sending email:", e);
+    console.log(e);
   }
 };
 

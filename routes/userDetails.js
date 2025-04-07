@@ -26,9 +26,9 @@ userDetails.get("/", userMiddleware, async (req, res) => {
       userID: req.userId,
       status: "correct",
     });
-    const correctlyAnsweredLastweek = correctlyAnswered.filter(
-      (c) => new Date() - c.addDate < 604800000
-    );
+    const correctlyAnsweredLastweek = correctlyAnswered.filter((c) => {
+      return new Date() - c.addDate < 604800000;
+    });
     const upvotes = doubtAnswered.reduce((acc, curr) => {
       return (acc = acc + (curr.upVotes || 0));
     }, 0);
@@ -60,6 +60,28 @@ userDetails.get("/", userMiddleware, async (req, res) => {
   } catch (e) {
     console.error("Dashboard error:", e);
     return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+});
+userDetails.get("/leaderboard", userMiddleware, async (req, res) => {
+  try {
+    const user = await UserDB.find({}).sort({ points: -1 });
+    const leaderboard = await Promise.all(
+      user.map(async (user) => {
+        const correctlyAnswered = await SolutionDB.countDocuments({
+          userID: user._id,
+          status: "correct",
+        });
+        return { ...user._doc, correctlyAnswered };
+      })
+    );
+    res.json({
+      result: leaderboard,
+    });
+  } catch (e) {
+    console.log(e);
+    res.json({
       message: "Internal server error",
     });
   }

@@ -150,7 +150,7 @@ solution.delete("/delete/:solutionId", userMiddleware, async (req, res) => {
     const AnswerCount = await SolutionDB.countDocuments({
       doubtID: questionId.doubtID,
     });
-    console.log(AnswerCount);
+    // console.log(AnswerCount);
     const d = await DoubtDB.findByIdAndUpdate(
       questionId.doubtID,
       { AnswerCount },
@@ -206,6 +206,7 @@ solution.put("/updateUpVotes/:solutionID", userMiddleware, async (req, res) => {
       solutionID,
       userID: req.userId,
     });
+    const solution = await SolutionDB.findById(solutionID);
     if (!upVoted) {
       const newUpVote = new SolutionsUpVotesDB({
         solutionID,
@@ -213,13 +214,19 @@ solution.put("/updateUpVotes/:solutionID", userMiddleware, async (req, res) => {
         upvoteDate: new Date(),
       });
       await newUpVote.save();
+      await UserDB.findByIdAndUpdate(solution.userID, {
+        $inc: { points: 1 },
+      });
     } else {
-      console.log(upVoted._id);
+      // console.log(upVoted._id);
       await SolutionsUpVotesDB.findByIdAndDelete(upVoted._id);
+      await UserDB.findByIdAndUpdate(solution.userID, {
+        $inc: { points: -1 },
+      });
     }
     const upVotes = await SolutionsUpVotesDB.find({ solutionID });
-    console.log(solutionID);
-    console.log(upVotes);
+    // console.log(solutionID);
+    // console.log(upVotes);
     await SolutionDB.findByIdAndUpdate(solutionID, { upVotes: upVotes.length });
     return res.json({
       message: "upvote updated",
@@ -243,7 +250,11 @@ solution.put("/updateStatus/:solutionID", userMiddleware, async (req, res) => {
     if (!solution) {
       return res.status(404).json({ error: "Solution not found" });
     }
-    await SolutionDB.findByIdAndUpdate(solutionID, { status: status });
+    const p = status === "pending" ? -50 : 50;
+    await SolutionDB.findByIdAndUpdate(solutionID, {
+      status: status,
+    });
+    await UserDB.findByIdAndUpdate(solution.userID, { $inc: { points: p } });
     await updateDoubtStatus(solution.doubtID);
     res.json({
       message: "status changed successfully",
