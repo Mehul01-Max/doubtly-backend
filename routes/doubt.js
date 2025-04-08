@@ -65,6 +65,13 @@ doubt.put("/modify/:doubtId", userMiddleware, async (req, res) => {
           "You are not allowed to modify this question as you are not the author",
       });
     }
+    // console.log(Doubt.addDate - new Date());
+    if (new Date() - Doubt.addDate > 300000) {
+      return res.status(403).json({
+        message:
+          "You are not allowed to modify as the doubt is posted more than 5 minutes ago",
+      });
+    }
     if (!heading || !description || !type) {
       return res.status(400).json({
         message: "heading, description and type are required",
@@ -100,6 +107,12 @@ doubt.delete("/delete/:doubtId", userMiddleware, async (req, res) => {
       return res.status(400).json({
         message:
           "You are not allowed to delete this question as you are not the author",
+      });
+    }
+    if (new Date() - Doubt.addDate > 300000) {
+      return res.status(403).json({
+        message:
+          "You are not allowed to delete as the doubt is posted more than 5 minutes ago",
       });
     }
     await DoubtDB.findByIdAndDelete(doubtId);

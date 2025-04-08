@@ -112,6 +112,12 @@ solution.put("/modify/:solutionId", userMiddleware, async (req, res) => {
           "You are not allowed to modify this solution as you are not the author",
       });
     }
+    if (new Date() - Solution.addDate > 300000) {
+      return res.status(403).json({
+        message:
+          "You are not allowed to modify as the solution is posted more than 5 minutes ago",
+      });
+    }
     if (!solution) {
       return res.status(400).json({
         message: "solution are required",
@@ -143,6 +149,12 @@ solution.delete("/delete/:solutionId", userMiddleware, async (req, res) => {
       return res.status(400).json({
         message:
           "You are not allowed to delete this solution as you are not the author",
+      });
+    }
+    if (new Date() - Solution.addDate > 300000) {
+      return res.status(403).json({
+        message:
+          "You are not allowed to delete as the solution is posted more than 5 minutes ago",
       });
     }
     const questionId = await SolutionDB.findById(solutionId);
