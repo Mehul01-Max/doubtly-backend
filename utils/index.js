@@ -156,10 +156,13 @@ const calculateTrendingScore = (doubt) => {
 };
 const updateDoubtStatus = async (doubtID) => {
   const solutions = await SolutionDB.find({ doubtID });
-
+  if (new Date() - solutions.addDate > 300000) {
+    return res.status(403).json({
+      message: "exeeded 5 min time limit for modification",
+    });
+  }
   let hasCorrect = false;
   let hasPending = false;
-  let hasWrong = false;
 
   solutions.forEach((sol) => {
     if (sol.status === "correct") hasCorrect = true;
