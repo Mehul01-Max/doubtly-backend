@@ -80,6 +80,7 @@ const formattedSolution = (d, userName, isUpvoted, isUserSol) => {
     username: userName || "Unknown User",
     upvotes: d.upVotes || 0,
     timeAgo: timeAgo,
+    date: d.addDate,
     isVerified: d.status,
     modifiedDate: modifiedDate || null,
     isUpvoted: isUpvoted.length === 0 ? false : true,
