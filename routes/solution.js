@@ -196,7 +196,7 @@ solution.get("/show/:questionId", userMiddleware, async (req, res) => {
     });
   }
   const allReventSol = await SolutionDB.find({ doubtID: questionId }).sort({
-    status: -1,
+    status: 1,
     upVotes: -1,
   });
   if (allReventSol === 0) {
