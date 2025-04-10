@@ -39,6 +39,13 @@ userDetails.get("/", userMiddleware, async (req, res) => {
     const upvoteLastWeek = upvoteList.filter((d) => {
       return new Date() - d.upvoteDate < 604800000;
     });
+    const users = await UserDB.find({}).sort({ points: -1 });
+    let rank = 0;
+    for (let i = 0; i < users.length; i++) {
+      if (users[i]._id == req.userId) {
+        rank = i + 1;
+      }
+    }
     const userDetails = {
       firstName: user.name.split(" ")[0],
       email: user.email,
@@ -53,6 +60,7 @@ userDetails.get("/", userMiddleware, async (req, res) => {
       upvoteLastWeek: upvoteLastWeek.length,
       fullName: user.name,
       points: user.points,
+      rank: rank,
     };
     return res.json({
       result: userDetails,
