@@ -255,7 +255,9 @@ doubt.put("/updateUpVotes/:questionID", userMiddleware, async (req, res) => {
 });
 doubt.get("/mydoubt", userMiddleware, async (req, res) => {
   try {
-    const Doubt = await DoubtDB.find({ userID: req.userId });
+    const Doubt = await DoubtDB.find({ userID: req.userId }).sort({
+      addDate: -1,
+    });
     if (Doubt.length === 0) {
       return res.json({
         message: "currently this doubt type is empty",
